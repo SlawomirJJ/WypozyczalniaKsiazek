@@ -12,7 +12,7 @@ namespace WypozyczalniaKsiazek
         public static void UsunUzytkownika(long PESEL)
         {
             BibliotekaDAO DAO = new BibliotekaDAO();
-            DAO.Delete(PESEL);
+            DAO.DeleteUser(PESEL);
 
         }
 
@@ -22,7 +22,7 @@ namespace WypozyczalniaKsiazek
             if(dl == 11)
             {
                 BibliotekaDAO DAO = new BibliotekaDAO();
-                DAO.Insert(PESEL, Imie, Nazwisko, Stanowisko);
+                DAO.InsertUser(PESEL, Imie, Nazwisko, Stanowisko);
             }
             else
                 Console.WriteLine("Zły pesel!");
@@ -31,29 +31,61 @@ namespace WypozyczalniaKsiazek
         public static void AktualizujUzytkownika(long PESEL, string Stanowisko)
         {
             BibliotekaDAO DAO = new BibliotekaDAO();
-            string obecneStanowisko=DAO.Select(PESEL);
+            string obecneStanowisko=DAO.SelectUser(PESEL);
 
             if (Stanowisko== "Wykładowca")
             {
                 if (obecneStanowisko == "Student")
                 {
-                    DAO.Update(PESEL, Stanowisko);
+                    DAO.UpdateUser(PESEL, Stanowisko);
                 }
             }
             else if (Stanowisko =="Pracownik")
             {
                 if (obecneStanowisko == "Student")
                 {
-                    DAO.Update(PESEL, Stanowisko);
+                    DAO.UpdateUser(PESEL, Stanowisko);
                 }
                 else if(obecneStanowisko =="Wykładowca")
                 {
-                    DAO.Update(PESEL, Stanowisko);
+                    DAO.UpdateUser(PESEL, Stanowisko);
                 }
             }
+            else
+            {
+                Console.WriteLine("Nie można dokonać zmiany.");
+            }         
+        }
+
+        //      ZARZĄDZANIE KSIĘGOZBIOREM       //
+        public static void DodajKsiazke(string Tytul, string Autor, string Rok_wydania)
+        {
+            BibliotekaDAO DAO = new BibliotekaDAO();
+            DAO.InsertBook(Tytul, Autor, Rok_wydania);
+        }
+
+        public static void UsunKsiazke(string Tytul, string Autor, string Rok_wydania)
+        {
+            BibliotekaDAO DAO = new BibliotekaDAO();
+            DAO.InsertBook(Tytul, Autor, Rok_wydania);
+        }
 
 
-           
+        public static void WyporzyczKsiazke(string Tytul, string Autor,long PESEL)
+        {
+            BibliotekaDAO DAO = new BibliotekaDAO();
+            string Id_ksiazki = DAO.SelectBook(Tytul, Autor);
+            if (Id_ksiazki != null)
+            {
+                DAO.InsertWypozyczenie(Id_ksiazki, PESEL);
+            }
+            
+        }
+
+        public static void OddajKsiazke(int Id_ksiazki)
+        {
+            BibliotekaDAO DAO = new BibliotekaDAO();
+            DAO.UpdateWypozyczenie
         }
     }
 }
