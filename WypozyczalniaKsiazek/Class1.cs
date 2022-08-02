@@ -58,16 +58,16 @@ namespace WypozyczalniaKsiazek
         }
 
         //      ZARZĄDZANIE KSIĘGOZBIOREM       //
-        public static void DodajKsiazke(string Tytul, string Autor, string Rok_wydania)
+        public static void DodajKsiazke(string Tytul, string Autor, int Rok_wydania)
         {
             BibliotekaDAO DAO = new BibliotekaDAO();
             DAO.InsertBook(Tytul, Autor, Rok_wydania);
         }
 
-        public static void UsunKsiazke(string Tytul, string Autor, string Rok_wydania)
+        public static void UsunKsiazke(int Id_ksiazki)
         {
             BibliotekaDAO DAO = new BibliotekaDAO();
-            DAO.InsertBook(Tytul, Autor, Rok_wydania);
+            DAO.DeleteBook(Id_ksiazki);
         }
 
 
@@ -82,10 +82,16 @@ namespace WypozyczalniaKsiazek
             
         }
 
-        public static void OddajKsiazke(int Id_ksiazki)
+        public static void UpdateDataWypozyczenia(int Id_ksiazki,string Data_wypozyczenia, long PESEL)
         {
             BibliotekaDAO DAO = new BibliotekaDAO();
-            DAO.UpdateWypozyczenie
+            DAO.UpdateData_wypozyczenia(Data_wypozyczenia, PESEL, Id_ksiazki);
+        }
+
+        public static void UpdateDataZwrotu(int Id_ksiazki, string Data_zwrotu, long PESEL)
+        {
+            BibliotekaDAO DAO = new BibliotekaDAO();
+            DAO.UpdateData_zwrotu(Data_zwrotu, PESEL, Id_ksiazki);
         }
     }
 }

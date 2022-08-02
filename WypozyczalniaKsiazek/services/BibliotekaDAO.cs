@@ -126,7 +126,7 @@ namespace WypozyczalniaKsiazek.services
 
         //////    ZARZĄDZANIE KSIĘGOZBIOREM            ////////////////////////////////////////////
 
-        public int InsertBook(string Tytul, string Autor, string Rok_wydania)
+        public int InsertBook(string Tytul, string Autor, int Rok_wydania)
         {
             int newPESEL = -1;
 
@@ -162,7 +162,7 @@ namespace WypozyczalniaKsiazek.services
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 SqlCommand command = new SqlCommand(sqlStatement, connection);
-                command.Parameters.Add("@PESEL", SqlDbType.Int);
+                command.Parameters.Add("@Id_ksiazki", SqlDbType.Int);
                 command.Parameters["@Id_ksiazki"].Value = Id_ksiazki;
 
                 try
@@ -183,13 +183,13 @@ namespace WypozyczalniaKsiazek.services
         {
             string Id_ksiazki =null;
 
-            string sqlStatement = "SELECT Id_ksiazki FROM Ksiazki LEFT JOIN Wypozyczenia ON ksiazki.Id_ksiazki = Wypozyczenia.Id_Ksiazki WHERE Ksiazki.Tytul=@Tytul AND Ksiazki.Autor=@Autor AND Wypozyczenia.Data_zwrotu IS NOT NULL";
+            string sqlStatement = "SELECT TOP 1 Id_ksiazki FROM Ksiazki WHERE Tytul=@Tytul AND Autor=@Autor EXCEPT SELECT Id_ksiazki FROM Wypozyczenia Where Data_zwrotu is NULL";
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 SqlCommand command = new SqlCommand(sqlStatement, connection);
-                command.Parameters["@Tytul"].Value = Tytul;
-                command.Parameters["@Autor"].Value = Autor;
+                command.Parameters.AddWithValue("@Tytul", Tytul);
+                command.Parameters.AddWithValue("@Autor", Autor);
 
                 try
                 {
@@ -197,7 +197,8 @@ namespace WypozyczalniaKsiazek.services
                     SqlDataReader reader = command.ExecuteReader();
                     while (reader.Read())
                     {
-                        Id_ksiazki = (string)reader[0];
+                        int Id_Ksiazki = (int)reader[0];
+                        Id_ksiazki = Id_Ksiazki.ToString();
                     }
 
                 }
@@ -240,20 +241,23 @@ namespace WypozyczalniaKsiazek.services
             }
         }
 
-        public int UpdateWypozyczenie(string Data_wypozyczenia, string Data_zwrotu, Id_osoby, Id_ksiazki )
+        public int UpdateData_wypozyczenia(string Data_wypozyczenia, long Id_osoby, int Id_ksiazki)
         {
             int newPESEL = -1;
 
-            string sqlStatement = "UPDATE Wypozyczenia SET Data_wypozyczenia = @Data_wypozyczenia, Data_zwrotu = @Data_zwrotu, WHERE Id_ksiazki=@Id_ksiazki AND Id_osoby=@Id_osoby AND (Data_wypozyczenia=NULL OR data_zwrotu=NULL; ";
+            string sqlStatement = "UPDATE Wypozyczenia SET Data_wypozyczenia = @Data_wypozyczenia WHERE Id_ksiazki=@Id_ksiazki AND Id_osoby=@Id_osoby;";
 
             using (SqlConnection connection = new SqlConnection(connectionString))
             {
                 SqlCommand command = new SqlCommand(sqlStatement, connection);
-                command.Parameters.Add("@PESEL", SqlDbType.BigInt);
-                command.Parameters["@PESEL"].Value = PESEL;
+                command.Parameters.Add("@Id_osoby", SqlDbType.BigInt);
+                command.Parameters["@Id_osoby"].Value = Id_osoby;
                 command.Parameters.Add("@Id_ksiazki", SqlDbType.Int);
                 command.Parameters["@Id_ksiazki"].Value = Id_ksiazki;
-
+                //command.Parameters.Add("@Data_wypozyczenia", SqlDbType.Date);
+                //command.Parameters["@Data_wypozyczenia"].Value = Data_wypozyczenia.ToString();
+                //command.Parameters.AddWithValue("@Data_wypozyczenia",  Data_wypozyczenia);
+                command.Parameters.AddWithValue("@Data_wypozyczenia", DateTimeOffset.Parse(Data_wypozyczenia));
                 try
                 {
                     connection.Open();
@@ -269,7 +273,35 @@ namespace WypozyczalniaKsiazek.services
             }
         }
 
+        public int UpdateData_zwrotu(string Data_zwrotu, long Id_osoby, int Id_ksiazki)
+        {
+            int newPESEL = -1;
 
+            string sqlStatement = "UPDATE Wypozyczenia SET Data_zwrotu = @Data_zwrotu WHERE Id_ksiazki=@Id_ksiazki AND Id_osoby=@Id_osoby;";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(sqlStatement, connection);
+                command.Parameters.Add("@Id_osoby", SqlDbType.BigInt);
+                command.Parameters["@Id_osoby"].Value = Id_osoby;
+                command.Parameters.Add("@Id_ksiazki", SqlDbType.Int);
+                command.Parameters["@Id_ksiazki"].Value = Id_ksiazki;
+                command.Parameters.AddWithValue("@Data_zwrotu", DateTimeOffset.Parse(Data_zwrotu));
+
+                try
+                {
+                    connection.Open();
+                    newPESEL = Convert.ToInt32(command.ExecuteScalar());
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+                return newPESEL;
+            }
+        }
 
 
 
