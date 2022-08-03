@@ -181,7 +181,7 @@ namespace WypozyczalniaKsiazek.services
 
         public string SelectBook(string Tytul, string Autor)
         {
-            string Id_ksiazki =null;
+            string Id_ksiazki = null;
 
             string sqlStatement = "SELECT TOP 1 Id_ksiazki FROM Ksiazki WHERE Tytul=@Tytul AND Autor=@Autor EXCEPT SELECT Id_ksiazki FROM Wypozyczenia Where Data_zwrotu is NULL";
 
@@ -208,6 +208,38 @@ namespace WypozyczalniaKsiazek.services
                 }
 
                 return Id_ksiazki;
+            }
+
+        }
+        public string SelectBook(int Id_ksiazki)
+        {
+            string Id_Ksiazki = null;
+
+            string sqlStatement = "SELECT TOP 1 Id_ksiazki FROM Ksiazki WHERE Id_ksiazki=@Id_ksiazki EXCEPT SELECT Id_ksiazki FROM Wypozyczenia Where Data_zwrotu is NULL";
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(sqlStatement, connection);
+                command.Parameters.Add("@Id_ksiazki", SqlDbType.Int);
+                command.Parameters["@Id_ksiazki"].Value = Id_ksiazki;
+
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        Id_ksiazki = (int)reader[0];
+                        Id_Ksiazki = Id_ksiazki.ToString();
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+                return Id_Ksiazki;
             }
 
         }
@@ -254,9 +286,6 @@ namespace WypozyczalniaKsiazek.services
                 command.Parameters["@Id_osoby"].Value = Id_osoby;
                 command.Parameters.Add("@Id_ksiazki", SqlDbType.Int);
                 command.Parameters["@Id_ksiazki"].Value = Id_ksiazki;
-                //command.Parameters.Add("@Data_wypozyczenia", SqlDbType.Date);
-                //command.Parameters["@Data_wypozyczenia"].Value = Data_wypozyczenia.ToString();
-                //command.Parameters.AddWithValue("@Data_wypozyczenia",  Data_wypozyczenia);
                 command.Parameters.AddWithValue("@Data_wypozyczenia", DateTimeOffset.Parse(Data_wypozyczenia));
                 try
                 {
@@ -303,7 +332,43 @@ namespace WypozyczalniaKsiazek.services
             }
         }
 
+        public struct Wypozyczenie
+        {
+            public int LiczbaDni;
+            public string Stanowisko;
+        }
+        public List<Wypozyczenie> SprawdzZwroty(long PESEL)
+        {
+            List<Wypozyczenie> LiczbaDniIStanowisko = new List<Wypozyczenie>();
+            
+            string sqlStatement = "SELECT datediff(day,Data_wypozyczenia,Data_zwrotu) AS LiczbaDni, Stanowisko FROM Wypozyczenia RIGHT JOIN Osoby ON Wypozyczenia.Id_osoby=Osoby.PESEL WHERE Id_osoby=97050802647;";
 
+            
+
+            using (SqlConnection connection = new SqlConnection(connectionString))
+            {
+                SqlCommand command = new SqlCommand(sqlStatement, connection);
+    command.Parameters.Add("@Id_osoby", SqlDbType.BigInt);
+                command.Parameters["@Id_osoby"].Value = PESEL;
+
+                try
+                {
+                    connection.Open();
+                    SqlDataReader reader = command.ExecuteReader();
+                    while (reader.Read())
+                    {
+                        LiczbaDniIStanowisko.Add(new Wypozyczenie { LiczbaDni = (int)reader[0], Stanowisko= (string)reader[1]});
+                    }
+
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+
+                return LiczbaDniIStanowisko;
+            }
+        }
 
 
 
