@@ -114,60 +114,67 @@ namespace WypozyczalniaKsiazek
             int kara=0;
             const int CZASNAODDANIE = 30; // w dniach
             var LiczbaDniIStanowisko = DAO.SprawdzZwroty(PESEL);
+            string Stanowisko = LiczbaDniIStanowisko[0].Stanowisko;
+
 
             for (int i = 0; i < LiczbaDniIStanowisko.Count; i++)
             {
-                int LiczbaDni = LiczbaDniIStanowisko[i].LiczbaDni;
-                string Stanowisko = LiczbaDniIStanowisko[i].Stanowisko;
+                int LiczbaDni = LiczbaDniIStanowisko[i].LiczbaDni;               
 
                 if (LiczbaDni > CZASNAODDANIE)
                 {
                     LiczbaDni = LiczbaDni- CZASNAODDANIE;
+                    if (Stanowisko == "Wykładowca")
+                    {
                         for (int j = 1; j <= LiczbaDni; j++)
                         {
-                            if (Stanowisko == "Wykładowca")
+                            if (j > 3 && j <= 14)
                             {
-                                if (j>3 && j<=14)
-                                {
-                                    kara = kara + 2; 
-                                }
-                                if (j>14 && j<=28)
-                                {
-                                    kara = kara + 5;
-                                }
-                                if (j>28)
-                                {
-                                    kara = kara + 10;
-                                }
+                                kara = kara + 2;
                             }
-                            else if (Stanowisko=="Student")
+                            if (j > 14 && j <= 28)
                             {
-                            if (j<=7)
-                                {
-                                kara = kara + 1;
-                                }
-                                if (j >7 && j <= 14)
-                                {
-                                    kara = kara + 2;
-                                }
-                                if (j > 14 && j<=28)
-                                {
-                                    kara = kara + 5;
-                                }
-                                if (j > 28)
-                                {
-                                    kara = kara + 10;
-                                }
+                                kara = kara + 5;
                             }
-                            else if(Stanowisko=="Pracownik")
+                            if (j > 28)
                             {
-                                if (j>28)
-                                {
-                                    kara = kara + 5;
-                                }
+                                kara = kara + 10;
                             }
-
                         }
+                    }
+                    else if (Stanowisko == "Student")
+                    {
+                        for (int j = 1; j <= LiczbaDni; j++)
+                        {
+                            if (j <= 7)
+                            {
+                                kara = kara + 1;
+                            }
+                            if (j > 7 && j <= 14)
+                            {
+                                kara = kara + 2;
+                            }
+                            if (j > 14 && j <= 28)
+                            {
+                                kara = kara + 5;
+                            }
+                            if (j > 28)
+                            {
+                                kara = kara + 10;
+                            }
+                        }
+                    }
+                    else if (Stanowisko == "Pracownik")
+                    {
+                        for (int j = 1; j <= LiczbaDni; j++)
+                        {
+                            if (j > 28)
+                            {
+                                kara = kara + 5;
+                            }
+                        }
+
+                    }
                 }
             }
             return kara;
